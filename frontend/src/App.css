@@ -1,14 +1,16 @@
 :root {
   --background-color: white;
+  --secondary-background-color: rgb(200, 200, 200);
   --text-primary: black;
   --text-secondary: royalblue;
   --accent: purple;
-  --link-color: cornflowerblue;
+  --link-color: darkblue;
   --border_color: darkgrey;
 }
 
 [data-theme='dark'] {
   --background-color: black;
+  --secondary-background-color: rgb(64, 45, 45);
   --text-primary: white;
   --text-secondary: grey;
   --accent: darkred;
@@ -34,12 +36,68 @@ a {
   height: 100%;
   padding: 0;
   margin: 0;
+  z-index: 5; /* this was stuff can be hidden behind it*/
   transition: all .5s;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.nav-menu {
+  height: 100%;
+  width: auto;
+  color: var(--text-primary);
+  /* background-color: var(--background-color); */
+  backdrop-filter: blur(8px);
+  position: fixed;
+  left: -50rem;
+  z-index: 80;
+  border-right: 1px solid var(--border_color);
+  padding-right: 2rem;
+  animation: close-navmenu 0.75s;
+}
+
+
+.nav-menu.active {
+  animation: open-navmenu 0.75s;
+  transform: translateX(50rem);
+}
+
+.nav-menu-logo {
+  padding-left: 0.5rem;
+}
+
+.nav-list, .nav-item {
+  text-align: left;
+  width: calc(100% + 2rem);
+  left: 0%;
+  margin: 0px;
+  padding-left:20px;
+  animation: ease-in-out 3s normal infinite;  
+}
+
+.nav-item, .nav-links {
+  width: 100%;
+}
+
+/* makes the whole width clickable */
+.nav-links { 
+  display: block;
+}
+
+.nav-item:hover {
+  left: 0%;
+  background-color: var(--secondary-background-color);
+}
+
+.nav-menu-toggle {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  z-index: 99;
+  padding-left:0.5rem;
 }
 
 .AnimatedButtonBox {
@@ -64,20 +122,20 @@ a {
 }
 
 .AnimatedButtonBox:hover {
-    animation-name: bounce;
+    animation-name: gentleBounce;
     animation-timing-function: ease;
 }
-@keyframes bounce {
+
+@keyframes gentleBounce {
   0%   { transform: translateY(0); }
   50%  { transform: translateY(-15px); }
   100% { transform: translateY(0); }
 }
 
-
 .errorBounce {
   outline: 0;
   border-color: red;
-  animation-name: bounce;
+  animation-name: gentleBounce;
   animation-duration: .5s;
   animation-delay: 0.25s;
 }
@@ -116,4 +174,52 @@ a {
     transform: translateX(0px);
     timing-function: ease-in;
   }
+}
+
+@keyframes open-navmenu {
+  0% {
+    transform: translateX(0px);
+    timing-function: ease-in;
+  }
+  100% {
+    transform: translateX(50rem);
+    timing-function: ease-in;
+  }
+}
+
+@keyframes close-navmenu {
+  0% {
+    transform: translateX(50rem);
+    timing-function: ease-in;
+  }
+  100% {
+    transform: translateX(0px);
+    timing-function: ease-in;
+  }
+}
+
+
+.positions-date-field {
+  border: 3px solid lightgrey;
+  border-radius: 20px;
+  width:90%;
+  padding-left: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.positions-date-calendar {
+  position: relative;
+  overflow:visible;
+  z-index:100000;
+  height: 40%;
+}
+
+._3curk {
+  position: fixed;
+  z-index: 100000;
+}
+
+.fa-trash-can {
+  color: red;
 }

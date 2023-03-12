@@ -1,30 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import IsLoggedInContext from '../contexts/IsLoggedInContext';
 import ThemeContext from '../contexts/ThemeContext';
 import AnimatedButtonBox from '../fields/AnimatedButtonBox';
-import Portal from './Portal';
-import { Button, Input, Spacer, Modal, Text, Row, Checkbox, Grid, Card } from '@nextui-org/react';
+import { Button, Input, Spacer, Modal, Text, Row, Checkbox, Grid } from '@nextui-org/react';
 import ErrorModule from '../components/ErrorModule';
 
+import validatePassword from '../utils/validatePassword.mjs';
+
 export default function LoginPage() {
+
+    const { isDark, toggleTheme } = useContext(ThemeContext);
+    const { setIsLoggedIn, setUserId, setAccessToken } = useContext(IsLoggedInContext);
+
     const [loginClicked, SetLoginClicked] = useState(false);
     const [signupClicked, SetSignupClicked] = useState(false);
-    const [logged_in, setLoggedIn] = useState(false);
     const [username, setUsername] = useState('');
     const [generalErrorMessage, setGeneralErrorMessage] = useState('');
     const [emailError, setEmailError] = useState('');
     const [usernameError, setUsernameError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [first_name, setFirstName] = useState(null);
     const [last_name, setLastName] = useState(null);
-    const [accessToken, setAccessToken] = useState('');
 
-
-
+    async function catchError(response) {
+        const data = await response.json();
+        console.log('inside the function: ', data);
+        if (data?.error_part === 'username') {
+            setUsernameError(data?.message);
+        } else if (data?.error_part === 'email') {
+            setEmailError(data?.message);
+        } else if (data?.error_part === 'password') {
+            setPasswordError(data?.message);
+        } else {
+            setGeneralErrorMessage(`ERROR - ${data?.message || 'unknown'}`);
+            setTimeout(() => {
+                setGeneralErrorMessage('');
+            }, 5000);
+        }
+    }
 
     return (
         <div className="LoginPage">
+            <Button 
+                css={{ width: '4rem', minWidth: '1rem', background: isDark ? 'lightgray' : 'black', color: isDark ? 'black' : 'white', position: 'fixed', left: '0%', top: '0%', margin: '1rem'}}
+             onPress={toggleTheme}><i className={isDark ? "fa-regular fa-moon" : "fa-regular fa-sun"}></i></Button>
 
             <div className="app-initial-buttons">
                 <AnimatedButtonBox title="New here?" button_text="Sign-Up Here" subtitle="you'll be prompted to enter your deets" onPress={() => SetSignupClicked(true)} />
@@ -34,7 +55,7 @@ export default function LoginPage() {
                     blur
                     aria-labelledby="modal-title"
                     open={signupClicked || loginClicked}
-                    onClose={(e) => { SetSignupClicked(false); SetLoginClicked(false); }}
+                    onClose={() => { setUsernameError(''); setPasswordError(''); SetSignupClicked(false); SetLoginClicked(false); }}
                 >
                     <Modal.Header>
                         <Text b id="modal-title" size={18}>
@@ -49,39 +70,46 @@ export default function LoginPage() {
                         <Spacer y={0.4} />
                         <Input
                             rounded
+                            value={username}
+                            initialValue=""
                             clearable
-                            type="text" 
+                            type="text"
                             required
+                            pattern="[a-z0-9]{1,15}"
+                            title="waht is this"
                             bordered
                             labelPlaceholder="Username*"
                             color={usernameError ? "error" : "primary"}
                             status={usernameError ? "error" : "default"}
                             helperText={usernameError}
                             helperColor={usernameError ? "error" : "primary"}
-                            onChange={(e) => setUsernameError('') && setUsername(e.target.value)} />
+                            onChange={(e) => setUsernameError('') || setUsername(e.target.value)} />
                         <Spacer y={0.5} />
 
                         <Input.Password
                             rounded
+                            initialValue=""
+                            value={password}
                             clearable
                             required
                             bordered
                             labelPlaceholder="Password*"
-                            color="primary"
-                            onChange={(e) => setPassword(e.target.value)} />
+                            color={passwordError ? "error" : "primary"}
+                            status={passwordError ? "error" : "default"}
+                            helperText={passwordError}
+                            helperColor={passwordError ? "error" : "primary"}
+                            onChange={(e) => setPasswordError('') || setPassword(e.target.value)} />
 
+                        <Row justify="space-between">
 
-                        {(loginClicked || !email) ? <>
-                            <Row justify="space-between">
+                            <Checkbox> <Text size={14}>Remember me</Text> </Checkbox>
 
-                                {!email ? <Checkbox> <Text size={14}>{email}Remember me</Text> </Checkbox> : <></>}
+                            {loginClicked ? <Text size={14}>Forgot password?</Text> : ''}
 
-                                {loginClicked ? <Text size={14}>Forgot password?</Text> : ''}
-
-                            </Row>
-                        </> : ''}
+                        </Row>
                         {loginClicked ? <>
                             <Button
+                                disabled={!validatePassword(password)}
                                 auto
                                 onPress={async () => {
                                     console.log('logging in');
@@ -90,17 +118,23 @@ export default function LoginPage() {
                                             'Content-Type': 'application/json'
                                         },
                                         body: JSON.stringify({
-                                            username,
+                                            username: username,
                                             password
                                         }),
                                         method: 'POST'
-                                    }).then((res) => {
-                                        console.log(res);
+                                    }).then(async (res) => {
+                                        console.log('response', res);
                                         if (res.status === 200) {
-                                            setLoggedIn(true);
+                                            res = await res.json();
+                                            localStorage.setItem('access_token', res.access_token); //used for long-term storage
+                                            localStorage.setItem('user_id', res.user_id);
                                             setAccessToken(res.access_token);
+                                            setUserId(res.user_id);
+                                            setIsLoggedIn(true);
+                                        } else {
+                                            catchError(res)
                                         }
-                                    })
+                                    }).catch(catchError)
                                 }}>
                                 Log-in&nbsp;&nbsp;<i className="fa-solid fa-right-to-bracket"></i>
                             </Button>
@@ -129,6 +163,7 @@ export default function LoginPage() {
                             <Spacer y={0.5} />
                             <Input
                                 rounded
+                                value={email}
                                 clearable
                                 type="email"
                                 bordered
@@ -138,7 +173,7 @@ export default function LoginPage() {
                                 status={emailError ? "error" : "default"}
                                 helperText={emailError}
                                 helperColor={emailError ? "error" : "primary"}
-                                onChange={(e) => setEmailError('') && setEmail(e.target.value)} />
+                                onChange={(e) => setEmailError('') || setEmail(e.target.value)} />
                             <Spacer y={0.1} />
                             <Button
                                 auto
@@ -167,22 +202,22 @@ export default function LoginPage() {
                                                     password
                                                 }),
                                                 method: 'POST'
-                                            }).then((res) => {
+                                            }).then(async (res) => {
                                                 console.log('LOG IN', res);
                                                 if (res.status === 200) {
-                                                    setLoggedIn(true);
+                                                    res = await res.json();
+                                                    localStorage.setItem('access_token', res.access_token);
                                                     setAccessToken(res.access_token);
+                                                    setUserId(res.user_id);
+                                                    setIsLoggedIn(true);
+                                                } else {
+                                                    catchError(res)
                                                 }
-                                            });
+                                            }).catch(catchError);
+                                        } else {
+                                            catchError(res);
                                         }
-                                    }).catch(err => {
-                                        setEmailError('error');
-                                        setUsernameError('error');
-                                        setGeneralErrorMessage(`ERROR - ${err?.data?.message || 'unknown'}`);
-                                        setTimeout(() => {
-                                            setGeneralErrorMessage('');
-                                        }, 5000);
-                                    });
+                                    }).catch(catchError);
                                 }}
                             >
                                 Sign-Up
@@ -190,12 +225,10 @@ export default function LoginPage() {
                         </>}
 
                     </Modal.Body>
-
                 </Modal>
 
                 <AnimatedButtonBox title="Coming Back?" button_text="Log-In Here" subtitle="you'll be prompted to enter your creds" onPress={() => SetLoginClicked(true)} />
             </div>
         </div>
     );
-
 }

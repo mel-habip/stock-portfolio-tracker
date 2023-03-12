@@ -25,8 +25,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxN
 
 
 ###
+GET http://localhost:8000/users/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjc0NDg3MzA5fQ.Qh0-gsq4X1zxfFPpVPD-zOVNWsenvpcz252SsthGhrI
+
+###
+GET http://localhost:8000/positions/user/15
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc2ODY0ODc2fQ.-Z59jWvMfRS3udlj-zf7lBzid5bxFgkC2gHNBRLkfcM
+
+###
 GET http://localhost:8000/users/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc2ODY0ODc2fQ.-Z59jWvMfRS3udlj-zf7lBzid5bxFgkC2gHNBRLkfcM
+
 
 ###
 PUT http://localhost:8000/users/4
@@ -51,13 +60,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxN
 
 ###
 POST http://localhost:8000/positions/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc2ODY0ODc2fQ.-Z59jWvMfRS3udlj-zf7lBzid5bxFgkC2gHNBRLkfcM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsImlhdCI6MTY3ODU4MTk1MH0.IGSuFSNeIx6CQro9BPiC0dkC9C0nYOZQbSUDMql1-AE
 content-type: application/json
 
 {
-    "ticker": "PWI",
-    "user_id": 1,
+    "ticker": "RIV",
     "size": 304.3444,
+    "user_id": 15,
     "notes": [
         "fave company",
         "split stock",
@@ -97,4 +106,5 @@ content-type: application/json
     "user_id": 2,
     "workspace_id": 3,
     "role": "workspace_supervisor"
+
 }

@@ -71,7 +71,8 @@ const REGULAR_SCHEDULED_JOBS = {
         }
     }),
     minutely: cron.schedule("* * * * *", async function () { //at 5:01am
-        log(`minutely triggered`);
+        // log(`minutely triggered`);
+
         // let quarterly_tasks = await query(`Select * FROM alerts WHERE frequency = 'SEMI_ANNUAL' AND active = TRUE`);
         // for await (const task of quarterly_tasks) {
         //     job_handler(task);

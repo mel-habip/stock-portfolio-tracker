@@ -24,7 +24,7 @@ positionRouter.use(authenticateToken);
 
 //all positions of a user, including the workspaces to which they might be associated
 positionRouter.get('/user/:user_id', async (req, res) => {
-    let sql = `Select * FROM positions LEFT JOIN workspace_position_associations ON positions.position_id = workspace_position_associations.position_id WHERE positions.user_id = ?;`;
+    let sql = `Select positions.*, workspace_id FROM positions LEFT JOIN workspace_position_associations ON positions.position_id = workspace_position_associations.position_id WHERE positions.user_id = ?;`;
 
     let matches = await query(sql, req.params.user_id);
 
@@ -92,7 +92,7 @@ positionRouter.post('/', async (req, res) => {
 
     let result = await query(sql, user_id, ticker, size, acquired_on, sold_on, notes);
 
-    if (!result) return res.status(422).send(`Something went wrong while creating a new Position`);
+    if (!result || !result?.affectedRows) return res.status(422).send(`Something went wrong while creating a new Position`);
 
     sql = `SELECT * FROM positions WHERE position_id = LAST_INSERT_ID();`;
 
@@ -102,7 +102,7 @@ positionRouter.post('/', async (req, res) => {
         result.notes = JSON.parse(result.notes);
     } catch {}
 
-    return res.status(200).json(result);
+    return res.status(201).json(result);
 });
 
 //import positions in bulk TODO:
